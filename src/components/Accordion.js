@@ -1,41 +1,39 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, FlatList } from 'react-native';
 
-const Accordion = ({ title, children }) => {
+const Accordion = ({ title, data }) => {
   const [expanded, setExpanded] = useState(false);
-  const [maxHeight, setMaxHeight] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
 
   const toggleAccordion = () => {
-    if (expanded) {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false
-      }).start();
-    } else {
-      Animated.timing(animation, {
-        toValue: maxHeight,
-        duration: 300,
-        useNativeDriver: false
-      }).start();
-    }
+    Animated.timing(animation, {
+      toValue: expanded ? 0 : 1,
+      duration: 300,
+      useNativeDriver: false
+    }).start();
     setExpanded(!expanded);
   };
+
+  const itemHeight = 50; // Define a fixed height for each item
+  const contentHeight = data.length * itemHeight;
+
+  const heightInterpolation = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, contentHeight]
+  });
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleAccordion} style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
       </TouchableOpacity>
-      <Animated.View style={{ height: animation, overflow: 'hidden' }}>
-        <View
-          style={styles.content}
-          onLayout={event => {
-            setMaxHeight(event.nativeEvent.layout.height);
-          }}
-        >
-          {children}
+      <Animated.View style={{ height: heightInterpolation, overflow: 'hidden' }}>
+        <View style={styles.content}>
+          {data.map((item, index) => (
+            <View key={index} style={[styles.item, { height: itemHeight }]}>
+              <Text style={styles.itemText}>{item}</Text>
+            </View>
+          ))}
         </View>
       </Animated.View>
     </View>
@@ -59,6 +57,14 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 15
+  },
+  item: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc'
+  },
+  itemText: {
+    fontSize: 16
   }
 });
 
