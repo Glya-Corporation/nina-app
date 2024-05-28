@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Alert } from 'react-native';
+import { StatusBar, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Alert, Modal } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,6 +31,39 @@ const Home = () => {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [formattedDate, setFormattedDate] = useState(formatDate(new Date()));
+  const [modalVisible, setModalVisible] = useState(false);
+  const [percentage, setPercentage] = useState('');
+
+  useEffect(() => {
+    const checkPercentage = async () => {
+      try {
+        const percentage = await AsyncStorage.getItem('percentage');
+        if (percentage === null) {
+          setModalVisible(true); // Show modal if percentage is not set
+        }
+      } catch (error) {
+        console.error('Error checking percentage', error);
+      }
+    };
+
+    checkPercentage();
+  }, []);
+
+  const savePercentage = async () => {
+    const value = parseInt(percentage, 10);
+    if (!isNaN(value) && value >= 1 && value <= 100) {
+      try {
+        await AsyncStorage.setItem('percentage', value.toString());
+        setModalVisible(false);
+        Alert.alert('Success', 'Percentage saved successfully!');
+      } catch (error) {
+        console.error('Error saving percentage', error);
+        Alert.alert('Error', 'There was an error saving the percentage.');
+      }
+    } else {
+      Alert.alert('Invalid Input', 'Please enter a valid percentage between 1 and 100.');
+    }
+  };
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -67,6 +100,25 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType='slide'
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Please enter a percentage between 1 and 100</Text>
+            <TextInput style={styles.input} placeholder='Percentage' value={percentage} onChangeText={setPercentage} keyboardType='numeric' />
+            <TouchableOpacity style={styles.button} onPress={savePercentage}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.card}>
         <TextInput style={styles.input} placeholder='Nombres' value={name} onChangeText={setName} />
         <CustomButton title={formattedDate} onPress={() => setShow(true)} />
@@ -118,7 +170,7 @@ const styles = StyleSheet.create({
     shadowColor: '#a4894e',
     shadowRadius: 5,
     shadowOpacity: 10,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   card: {
     width: 250,
@@ -185,6 +237,31 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     borderRadius: 5,
     marginTop: 5,
+    textAlign: 'center'
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalText: {
+    marginBottom: 15,
     textAlign: 'center'
   }
 });

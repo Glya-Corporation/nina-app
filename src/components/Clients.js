@@ -17,7 +17,9 @@ export default function Clients() {
       }
     };
 
-    fetchClients();
+    setTimeout(() => {
+      fetchClients();
+    }, 500);
   }, []);
 
   const handleDelete = async id => {
