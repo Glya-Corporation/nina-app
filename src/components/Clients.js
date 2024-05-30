@@ -4,11 +4,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Clients() {
   const [clientsList, setClientsList] = useState([]);
+  const [deletedClients, setDeletedClients] = useState([]);
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const data = await AsyncStorage.getItem('todayClients');
+        const data = await AsyncStorage.getItem('allClients');
         if (data !== null) {
           setClientsList(JSON.parse(data));
         }
@@ -17,16 +18,35 @@ export default function Clients() {
       }
     };
 
+    const fetchDeletedClients = async () => {
+      try {
+        const data = await AsyncStorage.getItem('deletedClients');
+        if (data !== null) {
+          setDeletedClients(JSON.parse(data));
+        }
+      } catch (error) {
+        console.error('Error fetching deleted clients data', error);
+      }
+    };
+
     setTimeout(() => {
       fetchClients();
+      fetchDeletedClients();
     }, 500);
   }, []);
 
   const handleDelete = async id => {
     try {
+      const clientToDelete = clientsList.find(client => client.id === id);
       const updatedList = clientsList.filter(client => client.id !== id);
-      await AsyncStorage.setItem('todayClients', JSON.stringify(updatedList));
+      const updatedDeletedClients = [...deletedClients, clientToDelete];
+
+      await AsyncStorage.setItem('allClients', JSON.stringify(updatedList));
+      await AsyncStorage.setItem('deletedClients', JSON.stringify(updatedDeletedClients));
+
       setClientsList(updatedList);
+      setDeletedClients(updatedDeletedClients);
+
       Alert.alert('Success', 'Client deleted successfully!');
     } catch (error) {
       console.error('Error deleting client', error);

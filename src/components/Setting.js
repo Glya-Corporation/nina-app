@@ -1,18 +1,32 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ScrollView, Alert } from 'react-native';
 import Accordion from './Accordion';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Setting = () => {
   const data1 = ['Item 1.1', 'Item 1.2', 'Item 1.3'];
   const data2 = ['Item 2.1', 'Item 2.2'];
-  const data3 = ['Item 3.1', 'Item 3.2', 'Item 3.3', 'Item 3.4'];
+  const data3 = ['Ubuntu', 'Montserrat', 'Merriweather', 'JosefinSans', 'Dosis', 'Dancing'];
+  const data4 = ['Item 2.1', 'Item 2.2'];
+  const data5 = ['Item 2.1', 'Item 2.2'];
+  const data6 = ['Item 2.1', 'Item 2.2'];
+  const data7 = ['Borrar Todo'];
+
+  const deletedAllData = () => {
+    AsyncStorage.clear();
+    Alert.alert('Reinicio completo');
+  };
 
   return (
-    <View style={styles.container}>
-      <Accordion title='Section 1' data={data1} />
-      <Accordion title='Section 2' data={data2} />
-      <Accordion title='Section 3' data={data3} />
-    </View>
+    <ScrollView style={styles.container}>
+      <Accordion title='Perfil' data={data1} />
+      <Accordion title='Temas' data={data2} />
+      <Accordion title='Fuentes' data={data3} />
+      <Accordion title='Porcentaje' data={data4} />
+      <Accordion title='Exportar' data={data5} />
+      <Accordion title='Importar' data={data6} />
+      <Accordion title='Borrar Todo' data={data7} functionClick={deletedAllData} />
+    </ScrollView>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import formatDate from '../functions/formaDate.js';
 
 const TotalReport = () => {
   const [serviceCounts, setServiceCounts] = useState({});
@@ -16,7 +17,7 @@ const TotalReport = () => {
         const parsedPercentage = storedPercentage ? parseInt(storedPercentage, 10) : 0;
         setPercentage(parsedPercentage);
 
-        const data = await AsyncStorage.getItem('todayClients');
+        const data = await AsyncStorage.getItem('allClients');
         const clients = data ? JSON.parse(data) : [];
 
         const serviceCounts = {
@@ -30,13 +31,18 @@ const TotalReport = () => {
 
         let totalCharged = 0;
 
-        clients.forEach(client => {
-          const service = client.service;
-          const price = parseFloat(client.price);
+        // Get today's date in the same format used for storing client dates
+        const today = formatDate(new Date());
 
-          if (serviceCounts.hasOwnProperty(service)) {
-            serviceCounts[service] += 1;
-            totalCharged += price;
+        clients.forEach(client => {
+          if (client.date === today) {
+            const service = client.service;
+            const price = parseFloat(client.price);
+
+            if (serviceCounts.hasOwnProperty(service)) {
+              serviceCounts[service] += 1;
+              totalCharged += price;
+            }
           }
         });
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView } from 'react-native';
 
-const Accordion = ({ title, data }) => {
+const Accordion = ({ title, data, functionClick }) => {
   const [expanded, setExpanded] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -23,33 +23,34 @@ const Accordion = ({ title, data }) => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <TouchableOpacity onPress={toggleAccordion} style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
       </TouchableOpacity>
       <Animated.View style={{ height: heightInterpolation, overflow: 'hidden' }}>
         <View style={styles.content}>
           {data.map((item, index) => (
-            <View key={index} style={[styles.item, { height: itemHeight }]}>
-              <Text style={styles.itemText}>{item}</Text>
-            </View>
+            <TouchableOpacity onPress={() => functionClick && functionClick()}>
+              <View key={index} style={[styles.item, { height: itemHeight }]}>
+                <Text style={styles.itemText}>{item}</Text>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
       </Animated.View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     marginVertical: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5
+    borderRadius: 10,
+    backgroundColor: '#a4894e',
+    elevation: 10
   },
   titleContainer: {
-    padding: 15,
-    backgroundColor: '#a4894e'
+    padding: 15
   },
   title: {
     color: '#fff',
@@ -61,10 +62,13 @@ const styles = StyleSheet.create({
   item: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc'
+    borderBottomColor: '#ccc',
+    marginBottom: 0
   },
   itemText: {
-    fontSize: 16
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 10
   }
 });
 

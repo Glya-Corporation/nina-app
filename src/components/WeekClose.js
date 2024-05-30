@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Alert } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Alert, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import formatDate from '../functions/formaDate.js';
 
 const WeekClose = () => {
   const [weeklyClose, setWeeklyClose] = useState([]);
@@ -40,9 +41,9 @@ const WeekClose = () => {
 
   const handleWeekClose = async (auto = false) => {
     try {
-      const todayClients = JSON.parse(await AsyncStorage.getItem('todayClients')) || [];
+      const allClients = JSON.parse(await AsyncStorage.getItem('allClients')) || [];
 
-      if (!auto && todayClients.length === 0) {
+      if (!auto && allClients.length === 0) {
         Alert.alert('Error', 'No hay clientes para cerrar la semana');
         return;
       }
@@ -51,26 +52,19 @@ const WeekClose = () => {
       const start = new Date(now.setDate(now.getDate() - now.getDay() + 1));
       const end = new Date(now.setDate(now.getDate() - now.getDay() + 7));
 
-      const formatDate = date => {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = String(date.getFullYear()).slice(-2);
-        return `${day}-${month}-${year}`;
-      };
-
       const startFormatted = formatDate(start);
       const endFormatted = formatDate(end);
 
       const newWeeklyClose = {
         start: startFormatted,
         end: endFormatted,
-        clients: todayClients
+        clients: allClients
       };
 
       const updatedWeeklyClose = [newWeeklyClose, ...weeklyClose];
 
       await AsyncStorage.setItem('weeklyClose', JSON.stringify(updatedWeeklyClose));
-      await AsyncStorage.setItem('todayClients', JSON.stringify([]));
+      await AsyncStorage.setItem('allClients', JSON.stringify([]));
 
       setWeeklyClose(updatedWeeklyClose);
       setFilteredData(updatedWeeklyClose);
@@ -139,18 +133,16 @@ const WeekClose = () => {
                 </>
               )}
               <Text style={styles.modalText}>Clientes:</Text>
-              <FlatList
-                data={selectedClose.clients}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.clientItem}>
-                    <Text style={styles.clientText}>Nombre: {item.name}</Text>
-                    <Text style={styles.clientText}>Servicio: {item.service}</Text>
-                    <Text style={styles.clientText}>Precio: ${parseFloat(item.price).toFixed(2)}</Text>
-                    <Text style={styles.clientText}>Fecha: {item.date}</Text>
+              <ScrollView style={styles.clientList}>
+                {selectedClose.clients.map((client, index) => (
+                  <View key={index} style={styles.clientItem}>
+                    <Text style={styles.clientText}>Nombre: {client.name}</Text>
+                    <Text style={styles.clientText}>Servicio: {client.service}</Text>
+                    <Text style={styles.clientText}>Precio: ${parseFloat(client.price).toFixed(2)}</Text>
+                    <Text style={styles.clientText}>Fecha: {client.date}</Text>
                   </View>
-                )}
-              />
+                ))}
+              </ScrollView>
               <TouchableOpacity style={styles.button} onPress={closeModal}>
                 <Text style={styles.buttonText}>Cerrar</Text>
               </TouchableOpacity>
@@ -202,7 +194,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
   modalContent: {
-    width: 300,
+    width: '80%',
+    maxHeight: '80%',
     padding: 20,
     backgroundColor: '#fff',
     borderRadius: 10
@@ -215,6 +208,9 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     marginBottom: 10
+  },
+  clientList: {
+    maxHeight: '50%'
   },
   clientItem: {
     backgroundColor: '#ffe5ad60',

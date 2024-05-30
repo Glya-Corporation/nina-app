@@ -3,19 +3,13 @@ import { StatusBar, StyleSheet, Text, View, TextInput, TouchableOpacity, Platfor
 import SelectDropdown from 'react-native-select-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import formatDate from '../functions/formaDate.js';
 
 const CustomButton = ({ title, onPress }) => (
   <TouchableOpacity style={styles.input} onPress={onPress}>
     <Text style={styles.buttonText}>{title}</Text>
   </TouchableOpacity>
 );
-
-const formatDate = date => {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
 
 const generateUniqueId = () => {
   return '_' + Math.random().toString(36).substr(2, 9); // Generates a random alphanumeric ID
@@ -84,14 +78,26 @@ const Home = () => {
     };
 
     try {
-      const existingData = await AsyncStorage.getItem('todayClients'); // Change storage key name
+      const existingData = await AsyncStorage.getItem('allClients');
       const dataArray = existingData ? JSON.parse(existingData) : [];
 
-      // Add new data and save to AsyncStorage
-      dataArray.push(newData);
-      await AsyncStorage.setItem('todayClients', JSON.stringify(dataArray));
+      const userExists = dataArray.some(client => client.name === name && client.date === formattedDate);
 
-      Alert.alert('Success', 'Data saved successfully!');
+      if (userExists) {
+        Alert.alert('Error', 'El usuario ya existe.');
+      } else {
+        dataArray.push(newData);
+        await AsyncStorage.setItem('allClients', JSON.stringify(dataArray));
+        Alert.alert('Éxito', 'Usuario guardado con éxito!');
+
+        // Clear input fields
+        setName('');
+        setPrice('');
+        setDescription('');
+        setService(null);
+        setDate(new Date());
+        setFormattedDate(formatDate(new Date()));
+      }
     } catch (error) {
       console.error('Error saving data', error);
       Alert.alert('Error', 'There was an error saving the data.');
@@ -125,15 +131,13 @@ const Home = () => {
         {show && <DateTimePicker value={date} mode='date' display='default' onChange={onChange} />}
         <SelectDropdown
           data={listItem}
-          onSelect={(selectedItem, index) => {
-            setService(selectedItem);
-          }}
-          renderButton={(selectedItem, isOpened) => (
+          onSelect={selectedItem => setService(selectedItem)}
+          renderButton={selectedItem => (
             <View style={styles.dropdownButtonStyle}>
               <Text style={styles.dropdownButtonTxtStyle}>{selectedItem || 'Selecciona...'}</Text>
             </View>
           )}
-          renderItem={(item, index, isSelected) => (
+          renderItem={(item, isSelected) => (
             <View style={[styles.dropdownItemStyle, isSelected && { backgroundColor: '#D2D9DF' }]}>
               <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
             </View>
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     shadowColor: '#a4894e',
     shadowRadius: 5,
     shadowOpacity: 10,
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   card: {
     width: 250,
