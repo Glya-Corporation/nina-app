@@ -1,19 +1,30 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal } from 'react-native';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Reservations = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [reservations, setReservations] = useState([]);
 
-  // Array de prueba con 5 elementos
-  const reservations = [
-    { id: '1', name: 'Andreina Bozo', date: '28-05-24', time: '19:00', detail: 'Reparacion de uña y relleno en una mano, en la otra mano poner uñas acrilicas' },
-    { id: '2', name: 'Luis Uzcategui', date: '28-05-24', time: '19:00', detail: 'Detalle de la cita 2' },
-    { id: '3', name: 'Cita 3', date: '28-05-24', time: '20:00', detail: 'Detalle de la cita 3' },
-    { id: '4', name: 'Cita 4', date: '28-05-24', time: '20:00', detail: 'Detalle de la cita 4' },
-    { id: '5', name: 'Cita 5', date: '28-05-24', time: '20:30', detail: 'Detalle de la cita 5' }
-  ];
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        const clientsData = await AsyncStorage.getItem('allClients');
+        const clients = clientsData ? JSON.parse(clientsData) : [];
+        const today = new Date();
+        const filteredClients = clients.filter(client => {
+          const reservationDate = new Date(client.date);
+          return reservationDate > today;
+        });
+        setReservations(filteredClients);
+      } catch (error) {
+        Alert.alert('Error', 'There was an error fetching the reservations');
+      }
+    };
+
+    fetchReservations();
+  }, []);
 
   const openModal = reservation => {
     setSelectedReservation(reservation);

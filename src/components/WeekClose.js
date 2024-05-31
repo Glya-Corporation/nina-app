@@ -49,16 +49,21 @@ const WeekClose = () => {
       }
 
       const now = new Date();
-      const start = new Date(now.setDate(now.getDate() - now.getDay() + 1));
-      const end = new Date(now.setDate(now.getDate() - now.getDay() + 7));
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+      const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7));
 
-      const startFormatted = formatDate(start);
-      const endFormatted = formatDate(end);
+      const startFormatted = formatDate(startOfWeek);
+      const endFormatted = formatDate(endOfWeek);
+
+      const clientsThisWeek = allClients.filter(client => {
+        const clientDate = new Date(client.date);
+        return clientDate >= startOfWeek && clientDate <= endOfWeek;
+      });
 
       const newWeeklyClose = {
         start: startFormatted,
         end: endFormatted,
-        clients: allClients
+        clients: clientsThisWeek
       };
 
       const updatedWeeklyClose = [newWeeklyClose, ...weeklyClose];
