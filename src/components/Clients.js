@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import formaDate from '../functions/formaDate.js';
 
 export default function Clients() {
   const [clientsList, setClientsList] = useState([]);
@@ -11,7 +12,9 @@ export default function Clients() {
       try {
         const data = await AsyncStorage.getItem('allClients');
         if (data !== null) {
-          setClientsList(JSON.parse(data));
+          const newData = JSON.parse(data);
+          const filterClients = newData.filter(item => item.date !== formaDate(new Date()));
+          setClientsList(filterClients);
         }
       } catch (error) {
         console.error('Error fetching data', error);
