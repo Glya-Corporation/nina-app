@@ -15,6 +15,7 @@ const Reservations = () => {
         const clients = clientsData ? JSON.parse(clientsData) : [];
         const today = formaDate(new Date());
         const filteredClients = clients.filter(client => client.date > today);
+        console.log(filteredClients);
         setReservations(filteredClients);
       } catch (error) {
         Alert.alert('Error', 'There was an error fetching the reservations');
@@ -43,7 +44,7 @@ const Reservations = () => {
           <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
             <Text style={styles.itemText}>{item.name}</Text>
             <Text style={styles.itemText}>{item.date}</Text>
-            <Text style={styles.itemText}>{item.time}</Text>
+            <Text style={styles.itemText}>{item.description}</Text>
           </TouchableOpacity>
         )}
       />
@@ -53,8 +54,8 @@ const Reservations = () => {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedReservation.name}</Text>
               <Text style={styles.modalDetail}>{selectedReservation.date}</Text>
-              <Text style={styles.modalDetail}>{selectedReservation.time}</Text>
-              <Text style={styles.modalDetail}>{selectedReservation.detail}</Text>
+              <Text style={styles.modalDetail}>$ {Number(selectedReservation.price).toFixed(2)}</Text>
+              <Text style={styles.modalDetail}>{selectedReservation.description}</Text>
               <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>Cerrar</Text>
               </TouchableOpacity>

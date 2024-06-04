@@ -3,40 +3,46 @@ import { FlatList, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert } 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formaDate from '../functions/formaDate.js';
 
-export default function Clients() {
+export default function Clients({ route }) {
   const [clientsList, setClientsList] = useState([]);
   const [deletedClients, setDeletedClients] = useState([]);
 
+  const fetchClients = async () => {
+    try {
+      const data = await AsyncStorage.getItem('allClients');
+      if (data) {
+        const allClients = JSON.parse(data);
+        const todayClients = allClients.filter(client => client.date === formaDate(new Date()));
+        setClientsList(todayClients);
+      }
+    } catch (error) {
+      console.error('Error fetching clients', error);
+    }
+  };
+
+  const fetchDeletedClients = async () => {
+    try {
+      const data = await AsyncStorage.getItem('deletedClients');
+      if (data) {
+        setDeletedClients(JSON.parse(data));
+      }
+    } catch (error) {
+      console.error('Error fetching deleted clients', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const data = await AsyncStorage.getItem('allClients');
-        if (data !== null) {
-          const newData = JSON.parse(data);
-          const filterClients = newData.filter(item => item.date !== formaDate(new Date()));
-          setClientsList(filterClients);
-        }
-      } catch (error) {
-        console.error('Error fetching data', error);
-      }
+    const fetchData = async () => {
+      await fetchClients();
+      await fetchDeletedClients();
     };
-
-    const fetchDeletedClients = async () => {
-      try {
-        const data = await AsyncStorage.getItem('deletedClients');
-        if (data !== null) {
-          setDeletedClients(JSON.parse(data));
-        }
-      } catch (error) {
-        console.error('Error fetching deleted clients data', error);
-      }
-    };
-
-    setTimeout(() => {
-      fetchClients();
-      fetchDeletedClients();
-    }, 500);
+    fetchData();
   }, []);
+
+  const updateClientsList = async () => {
+    await fetchClients();
+    await fetchDeletedClients();
+  };
 
   const handleDelete = async id => {
     try {
@@ -57,6 +63,13 @@ export default function Clients() {
     }
   };
 
+  useEffect(() => {
+    if (route.params?.refresh) {
+      fetchClients();
+      route.params.refresh = false; // Reset the refresh parameter
+    }
+  }, [route.params, fetchClients]);
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -73,7 +86,7 @@ export default function Clients() {
             </TouchableOpacity>
           </View>
         )}
-        keyExtractor={(item, index) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         showsVerticalScrollIndicator={false}
       />
       <StatusBar style='auto' />
@@ -86,7 +99,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    paddingBottom: 0 // To avoid overlap with the floating button
   },
   input: {
     width: 200,
