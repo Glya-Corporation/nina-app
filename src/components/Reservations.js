@@ -1,68 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formaDate from '../functions/formaDate';
 
-const Reservations = () => {
+const ReservationModal = ({ visible, reservation, onClose }) => {
+  if (!reservation) return null;
+
+  return (
+    <Modal transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{reservation.name}</Text>
+          <Text style={styles.modalDetail}>{reservation.date}</Text>
+          <Text style={styles.modalDetail}>$ {Number(reservation.price).toFixed(2)}</Text>
+          <Text style={styles.modalDetail}>{reservation.description}</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const Reservations = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [reservations, setReservations] = useState([]);
 
-  useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        const clientsData = await AsyncStorage.getItem('allClients');
-        const clients = clientsData ? JSON.parse(clientsData) : [];
-        const today = formaDate(new Date());
-        const filteredClients = clients.filter(client => client.date > today);
-        console.log(filteredClients);
-        setReservations(filteredClients);
-      } catch (error) {
-        Alert.alert('Error', 'There was an error fetching the reservations');
-      }
-    };
+  const fetchReservations = useCallback(async () => {
+    try {
+      const clientsData = await AsyncStorage.getItem('allClients');
+      const clients = clientsData ? JSON.parse(clientsData) : [];
+      const today = formaDate(new Date());
+      const filteredClients = clients.filter(client => client.date > today);
+      setReservations(filteredClients);
 
-    fetchReservations();
+      console.log(clientsData);
+    } catch (error) {
+      Alert.alert('Error', 'There was an error fetching the reservations');
+    }
   }, []);
 
-  const openModal = reservation => {
+  useEffect(() => {
+    fetchReservations();
+  }, [fetchReservations]);
+
+  useEffect(() => {
+    if (route.params?.refresh) {
+      fetchReservations();
+    }
+  }, [route.params?.refresh, fetchReservations]);
+
+  const openModal = useCallback(reservation => {
     setSelectedReservation(reservation);
     setModalVisible(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setSelectedReservation(null);
     setModalVisible(false);
-  };
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
+        <Text style={styles.itemText}>{item.name}</Text>
+        <Text style={styles.itemText}>{item.date}</Text>
+        <Text style={styles.itemText}>{item.description}</Text>
+      </TouchableOpacity>
+    ),
+    [openModal]
+  );
+
+  const keyExtractor = useCallback(item => item.id, []);
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={reservations}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
-            <Text style={styles.itemText}>{item.name}</Text>
-            <Text style={styles.itemText}>{item.date}</Text>
-            <Text style={styles.itemText}>{item.description}</Text>
-          </TouchableOpacity>
-        )}
-      />
-      {selectedReservation && (
-        <Modal transparent={true} visible={modalVisible} onRequestClose={closeModal}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{selectedReservation.name}</Text>
-              <Text style={styles.modalDetail}>{selectedReservation.date}</Text>
-              <Text style={styles.modalDetail}>$ {Number(selectedReservation.price).toFixed(2)}</Text>
-              <Text style={styles.modalDetail}>{selectedReservation.description}</Text>
-              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      )}
+      <FlatList data={reservations} keyExtractor={keyExtractor} renderItem={renderItem} />
+      <ReservationModal visible={modalVisible} reservation={selectedReservation} onClose={closeModal} />
     </View>
   );
 };

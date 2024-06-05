@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Alert, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Alert, ScrollView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formatDate from '../functions/formaDate.js';
 
-const WeekClose = () => {
+const WeekClose = ({ route }) => {
   const [weeklyClose, setWeeklyClose] = useState([]);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedClose, setSelectedClose] = useState(null);
-  const [percentage, setPercentage] = useState(20); // Default percentage, can be updated from AsyncStorage
+  const [percentage, setPercentage] = useState(20);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const storedWeeklyClose = JSON.parse(await AsyncStorage.getItem('weeklyClose')) || [];
-        setWeeklyClose(storedWeeklyClose);
-        setFilteredData(storedWeeklyClose);
-
-        const storedPercentage = await AsyncStorage.getItem('percentage');
-        if (storedPercentage) {
-          setPercentage(parseFloat(storedPercentage));
-        }
-
-        checkAutoClose();
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      }
-    };
-
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    if (route.params?.refresh) {
+      fetchInitialData();
+      route.params.refresh = false; // Reset the refresh parameter
+    }
+  }, [route.params, fetchInitialData]);
+
+  const fetchInitialData = async () => {
+    try {
+      const storedWeeklyClose = JSON.parse(await AsyncStorage.getItem('weeklyClose')) || [];
+      const storedPercentage = await AsyncStorage.getItem('percentage');
+
+      setWeeklyClose(storedWeeklyClose);
+      setFilteredData(storedWeeklyClose);
+      if (storedPercentage) setPercentage(parseFloat(storedPercentage));
+
+      checkAutoClose();
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    }
+  };
 
   const checkAutoClose = async () => {
     const now = new Date();
@@ -56,8 +62,8 @@ const WeekClose = () => {
       const endFormatted = formatDate(endOfWeek);
 
       const clientsThisWeek = allClients.filter(client => {
-        const clientDate = new Date(client.date);
-        return clientDate >= startOfWeek && clientDate <= endOfWeek;
+        const clientDate = client.date;
+        return clientDate >= startFormatted && clientDate <= endFormatted;
       });
 
       const newWeeklyClose = {
@@ -69,14 +75,12 @@ const WeekClose = () => {
       const updatedWeeklyClose = [newWeeklyClose, ...weeklyClose];
 
       await AsyncStorage.setItem('weeklyClose', JSON.stringify(updatedWeeklyClose));
-      await AsyncStorage.setItem('allClients', JSON.stringify([]));
+      await AsyncStorage.setItem('allClients', JSON.stringify(allClients.filter(client => !clientsThisWeek.includes(client))));
 
       setWeeklyClose(updatedWeeklyClose);
       setFilteredData(updatedWeeklyClose);
 
-      if (!auto) {
-        Alert.alert('Éxito', 'Cierre semanal realizado correctamente');
-      }
+      if (!auto) Alert.alert('Éxito', 'Cierre semanal realizado correctamente');
     } catch (error) {
       Alert.alert('Error', 'Hubo un error al realizar el cierre semanal');
       console.error(error);
@@ -103,6 +107,21 @@ const WeekClose = () => {
     setModalVisible(false);
   };
 
+  const handleDeleteItem = async item => {
+    try {
+      const index = weeklyClose.indexOf(item);
+      const newWeeklyClose = [...weeklyClose];
+      newWeeklyClose.splice(index, 1);
+      setWeeklyClose(newWeeklyClose);
+      setFilteredData(newWeeklyClose);
+      await AsyncStorage.setItem('weeklyClose', JSON.stringify(newWeeklyClose));
+      Alert.alert('Éxito', 'Cierre semanal eliminado correctamente');
+    } catch (error) {
+      Alert.alert('Error', 'Hubo un error al eliminar el cierre semanal');
+      console.error(error);
+    }
+  };
+
   const calculateTotals = clients => {
     const totalCharged = clients.reduce((sum, client) => sum + parseFloat(client.price), 0);
     const totalEarned = totalCharged * (percentage / 100);
@@ -111,9 +130,14 @@ const WeekClose = () => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
-      <Text style={styles.itemText}>Inicio: {item.start}</Text>
-      <Text style={styles.itemText}>Final: {item.end}</Text>
-      <Text style={styles.itemText}>Clientes: {item.clients.length}</Text>
+      <View style={styles.itemContent}>
+        <Text style={styles.itemText}>Inicio: {item.start}</Text>
+        <Text style={styles.itemText}>Final: {item.end}</Text>
+        <Text style={styles.itemText}>Clientes: {item.clients.length}</Text>
+      </View>
+      <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.deleteIcon}>
+        <MaterialIcons name='delete' size={24} color='black' />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 
@@ -176,7 +200,13 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 8,
     backgroundColor: '#ffe5ad60',
-    borderRadius: 5
+    borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  itemContent: {
+    flex: 1
   },
   itemText: {
     fontSize: 18
@@ -225,6 +255,11 @@ const styles = StyleSheet.create({
   },
   clientText: {
     fontSize: 16
+  },
+  deleteIcon: {
+    marginLeft: 10,
+    padding: 5,
+    borderRadius: 20
   }
 });
 
