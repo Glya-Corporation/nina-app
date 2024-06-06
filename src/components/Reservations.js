@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import formaDate from '../functions/formaDate';
+import formatDate from '../functions/formatDate';
+import formaterDate from '../functions/formaterDate';
 
 const ReservationModal = ({ visible, reservation, onClose }) => {
   if (!reservation) return null;
@@ -32,11 +33,11 @@ const Reservations = ({ route }) => {
     try {
       const clientsData = await AsyncStorage.getItem('allClients');
       const clients = clientsData ? JSON.parse(clientsData) : [];
-      const today = formaDate(new Date());
-      const filteredClients = clients.filter(client => client.date > today);
+      const today = formatDate(new Date());
+      console.log(today);
+      console.log(formaterDate(today));
+      const filteredClients = clients.filter(client => formaterDate(client.date) >= today && (client.date) !== today);
       setReservations(filteredClients);
-
-      console.log(clientsData);
     } catch (error) {
       Alert.alert('Error', 'There was an error fetching the reservations');
     }

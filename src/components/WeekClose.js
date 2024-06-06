@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Alert, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import formatDate from '../functions/formaDate.js';
+import formatDate from '../functions/formatDate.js';
 
 const WeekClose = ({ route }) => {
   const [weeklyClose, setWeeklyClose] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import formaDate from '../functions/formaDate.js';
+import formaDate from '../functions/formatDate.js';
 
 export default function Clients({ route }) {
   const [clientsList, setClientsList] = useState([]);

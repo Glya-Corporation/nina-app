@@ -3,7 +3,7 @@ import { StatusBar, StyleSheet, Text, View, TextInput, TouchableOpacity, Platfor
 import SelectDropdown from 'react-native-select-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import formatDate from '../functions/formaDate.js';
+import formatDate from '../functions/formatDate.js';
 
 const CustomButton = ({ title, onPress }) => (
   <TouchableOpacity style={styles.input} onPress={onPress}>

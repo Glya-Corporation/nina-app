@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import formatDate from '../functions/formaDate.js';
+import formatDate from '../functions/formatDate.js';
 
 const TotalReport = ({ route }) => {
   const [serviceCounts, setServiceCounts] = useState({});
