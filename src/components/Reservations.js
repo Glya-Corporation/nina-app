@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formatDate from '../functions/formatDate';
-import formaterDate from '../functions/formaterDate';
+import filterDate from '../functions/filterDate';
 
 const ReservationModal = ({ visible, reservation, onClose }) => {
   if (!reservation) return null;
@@ -34,10 +34,8 @@ const Reservations = ({ route }) => {
       const clientsData = await AsyncStorage.getItem('allClients');
       const clients = clientsData ? JSON.parse(clientsData) : [];
       const today = formatDate(new Date());
-      console.log(today);
-      console.log(formaterDate(today));
-      const filteredClients = clients.filter(client => formaterDate(client.date) >= today && (client.date) !== today);
-      setReservations(filteredClients);
+      //const filteredClients = clients.filter(client => formaterDate(client.date) >= today && (client.date) !== today);
+      setReservations(filterDate(clients, today));
     } catch (error) {
       Alert.alert('Error', 'There was an error fetching the reservations');
     }
@@ -51,7 +49,7 @@ const Reservations = ({ route }) => {
     if (route.params?.refresh) {
       fetchReservations();
     }
-  }, [route.params?.refresh, fetchReservations]);
+  }, [route.params, fetchReservations]);
 
   const openModal = useCallback(reservation => {
     setSelectedReservation(reservation);
