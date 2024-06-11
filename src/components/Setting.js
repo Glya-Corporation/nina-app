@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, Alert } from 'react-native';
+import { StyleSheet, ScrollView, Alert, BackHandler } from 'react-native';
 import Accordion from './Accordion';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ImportData from './ImportData';
@@ -14,6 +14,9 @@ const Setting = () => {
   const deletedAllData = () => {
     AsyncStorage.clear();
     Alert.alert('Reinicio completo');
+    setTimeout(() => {
+      BackHandler.exitApp();
+    }, 2000);
   };
 
   return (
