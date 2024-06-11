@@ -2,14 +2,13 @@ import React from 'react';
 import { StyleSheet, View, ScrollView, Alert } from 'react-native';
 import Accordion from './Accordion';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ImportData from './ImportData';
 
 const Setting = () => {
   const data1 = ['Item 1.1', 'Item 1.2', 'Item 1.3'];
   const data2 = ['Item 2.1', 'Item 2.2'];
   const data3 = ['Ubuntu', 'Montserrat', 'Merriweather', 'JosefinSans', 'Dosis', 'Dancing'];
-  const data4 = ['Item 2.1', 'Item 2.2'];
-  const data5 = ['Item 2.1', 'Item 2.2'];
-  const data6 = ['Item 2.1', 'Item 2.2'];
+  const data4 = ['Cambiar Porcentaje'];
   const data7 = ['Borrar Todo'];
 
   const deletedAllData = () => {
@@ -23,9 +22,9 @@ const Setting = () => {
       <Accordion title='Temas' data={data2} />
       <Accordion title='Fuentes' data={data3} />
       <Accordion title='Porcentaje' data={data4} />
-      <Accordion title='Exportar' data={data5} />
-      <Accordion title='Importar' data={data6} />
       <Accordion title='Borrar Todo' data={data7} functionClick={deletedAllData} />
+      <ImportData />
+      {/* <Accordion title='Exportar' data={data5} /> */}
     </ScrollView>
   );
 };

@@ -30,8 +30,8 @@ const Accordion = ({ title, data, functionClick }) => {
       <Animated.View style={{ height: heightInterpolation, overflow: 'hidden' }}>
         <View style={styles.content}>
           {data.map((item, index) => (
-            <TouchableOpacity onPress={() => functionClick && functionClick()}>
-              <View key={index} style={[styles.item, { height: itemHeight }]}>
+            <TouchableOpacity key={index} onPress={() => functionClick && functionClick()}>
+              <View style={[styles.item, { height: itemHeight }]}>
                 <Text style={styles.itemText}>{item}</Text>
               </View>
             </TouchableOpacity>

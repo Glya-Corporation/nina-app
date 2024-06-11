@@ -34,7 +34,6 @@ const Reservations = ({ route }) => {
       const clientsData = await AsyncStorage.getItem('allClients');
       const clients = clientsData ? JSON.parse(clientsData) : [];
       const today = formatDate(new Date());
-      //const filteredClients = clients.filter(client => formaterDate(client.date) >= today && (client.date) !== today);
       setReservations(filterDate(clients, today));
     } catch (error) {
       Alert.alert('Error', 'There was an error fetching the reservations');
@@ -64,8 +63,9 @@ const Reservations = ({ route }) => {
   const renderItem = useCallback(
     ({ item }) => (
       <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
-        <Text style={styles.itemText}>{item.name}</Text>
         <Text style={styles.itemText}>{item.date}</Text>
+        <Text style={styles.itemText}>{item.name}</Text>
+        <Text style={styles.itemText}>$ {Number(item.price).toFixed(2)}</Text>
         <Text style={styles.itemText}>{item.description}</Text>
       </TouchableOpacity>
     ),
