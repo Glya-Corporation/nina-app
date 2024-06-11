@@ -11,11 +11,11 @@ const TotalReport = ({ route }) => {
 
   const fetchData = useCallback(async () => {
     try {
-      const storedPercentage = await AsyncStorage.getItem('percentage');
+      const storedPercentage = await AsyncStorage.getItem('porcentaje');
       const parsedPercentage = storedPercentage ? parseInt(storedPercentage, 10) : 0;
       setPercentage(parsedPercentage);
 
-      const data = await AsyncStorage.getItem('allClients');
+      const data = await AsyncStorage.getItem('clientesGuardados');
       const clients = data ? JSON.parse(data) : [];
 
       const serviceCounts = {

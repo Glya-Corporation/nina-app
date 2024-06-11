@@ -25,8 +25,10 @@ const WeekClose = ({ route }) => {
 
   const fetchInitialData = async () => {
     try {
-      const storedWeeklyClose = JSON.parse(await AsyncStorage.getItem('weeklyClose')) || [];
-      const storedPercentage = await AsyncStorage.getItem('percentage');
+      const storedWeeklyClose = JSON.parse(await AsyncStorage.getItem('registro')) || [];
+      const storedPercentage = await AsyncStorage.getItem('porcentaje');
+
+      console.log(storedWeeklyClose);
 
       setWeeklyClose(storedWeeklyClose);
       setFilteredData(storedWeeklyClose);
@@ -47,9 +49,9 @@ const WeekClose = ({ route }) => {
 
   const handleWeekClose = async (auto = false) => {
     try {
-      const allClients = JSON.parse(await AsyncStorage.getItem('allClients')) || [];
+      const clientesGuardados = JSON.parse(await AsyncStorage.getItem('clientesGuardados')) || [];
 
-      if (!auto && allClients.length === 0) {
+      if (!auto && clientesGuardados.length === 0) {
         Alert.alert('Error', 'No hay clientes para cerrar la semana');
         return;
       }
@@ -61,21 +63,26 @@ const WeekClose = ({ route }) => {
       const startFormatted = formatDate(startOfWeek);
       const endFormatted = formatDate(endOfWeek);
 
-      const clientsThisWeek = allClients.filter(client => {
+      const clientsThisWeek = clientesGuardados.filter(client => {
         const clientDate = client.date;
         return clientDate >= startFormatted && clientDate <= endFormatted;
       });
 
+      const totalCharged = clientsThisWeek.reduce((sum, client) => sum + parseFloat(client.price), 0);
+      const totalEarned = totalCharged * (percentage / 100);
+
       const newWeeklyClose = {
-        start: startFormatted,
-        end: endFormatted,
-        clients: clientsThisWeek
+        inicio: startFormatted,
+        cierre: endFormatted,
+        clientes: clientsThisWeek,
+        cobrado: totalCharged,
+        ganado: totalEarned
       };
 
       const updatedWeeklyClose = [newWeeklyClose, ...weeklyClose];
 
-      await AsyncStorage.setItem('weeklyClose', JSON.stringify(updatedWeeklyClose));
-      await AsyncStorage.setItem('allClients', JSON.stringify(allClients.filter(client => !clientsThisWeek.includes(client))));
+      await AsyncStorage.setItem('registro', JSON.stringify(updatedWeeklyClose));
+      await AsyncStorage.setItem('clientesGuardados', JSON.stringify(clientesGuardados.filter(client => !clientsThisWeek.includes(client))));
 
       setWeeklyClose(updatedWeeklyClose);
       setFilteredData(updatedWeeklyClose);
@@ -90,7 +97,7 @@ const WeekClose = ({ route }) => {
   const handleSearch = text => {
     setSearch(text);
     if (text) {
-      const filtered = weeklyClose.filter(item => item.start.includes(text) || item.end.includes(text));
+      const filtered = weeklyClose.filter(item => item.inicio.includes(text) || item.cierre.includes(text));
       setFilteredData(filtered);
     } else {
       setFilteredData(weeklyClose);
@@ -114,7 +121,7 @@ const WeekClose = ({ route }) => {
       newWeeklyClose.splice(index, 1);
       setWeeklyClose(newWeeklyClose);
       setFilteredData(newWeeklyClose);
-      await AsyncStorage.setItem('weeklyClose', JSON.stringify(newWeeklyClose));
+      await AsyncStorage.setItem('registro', JSON.stringify(newWeeklyClose));
       Alert.alert('Éxito', 'Cierre semanal eliminado correctamente');
     } catch (error) {
       Alert.alert('Error', 'Hubo un error al eliminar el cierre semanal');
@@ -122,18 +129,14 @@ const WeekClose = ({ route }) => {
     }
   };
 
-  const calculateTotals = clients => {
-    const totalCharged = clients.reduce((sum, client) => sum + parseFloat(client.price), 0);
-    const totalEarned = totalCharged * (percentage / 100);
-    return { totalCharged, totalEarned };
-  };
-
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => openModal(item)} style={styles.item}>
       <View style={styles.itemContent}>
-        <Text style={styles.itemText}>Inicio: {item.start}</Text>
-        <Text style={styles.itemText}>Final: {item.end}</Text>
-        <Text style={styles.itemText}>Clientes: {item.clients.length}</Text>
+        <Text style={styles.itemText}>Inicio: {item.inicio}</Text>
+        <Text style={styles.itemText}>Final: {item.cierre}</Text>
+        <Text style={styles.itemText}>Clientes: {item.clientes.length}</Text>
+        <Text style={styles.itemText}>Total Cobrado: ${item.totalCobrado.toFixed(2)}</Text>
+        <Text style={styles.itemText}>Total Ganado: ${item.totalGanado.toFixed(2)}</Text>
       </View>
       <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.deleteIcon}>
         <MaterialIcons name='delete' size={24} color='black' />
@@ -153,17 +156,13 @@ const WeekClose = ({ route }) => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Detalles del Cierre</Text>
-              <Text style={styles.modalText}>Inicio: {selectedClose.start}</Text>
-              <Text style={styles.modalText}>Final: {selectedClose.end}</Text>
-              {selectedClose && calculateTotals(selectedClose.clients) && (
-                <>
-                  <Text style={styles.modalText}>Total Cobrado: ${calculateTotals(selectedClose.clients).totalCharged.toFixed(2)}</Text>
-                  <Text style={styles.modalText}>Total Ganado: ${calculateTotals(selectedClose.clients).totalEarned.toFixed(2)}</Text>
-                </>
-              )}
+              <Text style={styles.modalText}>Inicio: {selectedClose.inicio}</Text>
+              <Text style={styles.modalText}>Final: {selectedClose.cierre}</Text>
+              <Text style={styles.modalText}>Total Cobrado: ${selectedClose.totalCobrado.toFixed(2)}</Text>
+              <Text style={styles.modalText}>Total Ganado: ${selectedClose.totalGanado.toFixed(2)}</Text>
               <Text style={styles.modalText}>Clientes:</Text>
               <ScrollView style={styles.clientList}>
-                {selectedClose.clients.map((client, index) => (
+                {selectedClose.clientes.map((client, index) => (
                   <View key={index} style={styles.clientItem}>
                     <Text style={styles.clientText}>Nombre: {client.name}</Text>
                     <Text style={styles.clientText}>Servicio: {client.service}</Text>

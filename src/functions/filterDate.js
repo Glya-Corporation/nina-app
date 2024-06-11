@@ -9,7 +9,7 @@ export default filterDate = (dates, today) => {
       array.push({ date, ...rest });
     }
   }
-  
+
   array.sort((a, b) => {
     const [dayA, monthA, yearA] = a.date.split('-').map(Number);
     const [dayB, monthB, yearB] = b.date.split('-').map(Number);
@@ -18,5 +18,6 @@ export default filterDate = (dates, today) => {
     if (monthA !== monthB) return monthA - monthB;
     return dayA - dayB;
   });
+  
   return array;
 };

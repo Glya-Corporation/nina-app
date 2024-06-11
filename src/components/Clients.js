@@ -9,10 +9,10 @@ export default function Clients({ route }) {
 
   const fetchClients = async () => {
     try {
-      const data = await AsyncStorage.getItem('allClients');
+      const data = await AsyncStorage.getItem('clientesGuardados');
       if (data) {
-        const allClients = JSON.parse(data);
-        const todayClients = allClients.filter(client => client.date === formaDate(new Date()));
+        const clientesGuardados = JSON.parse(data);
+        const todayClients = clientesGuardados.filter(client => client.date === formaDate(new Date()));
         setClientsList(todayClients);
       }
     } catch (error) {
@@ -50,8 +50,8 @@ export default function Clients({ route }) {
       const updatedList = clientsList.filter(client => client.id !== id);
       const updatedDeletedClients = [...deletedClients, clientToDelete];
 
-      await AsyncStorage.setItem('allClients', JSON.stringify(updatedList));
-      await AsyncStorage.setItem('deletedClients', JSON.stringify(updatedDeletedClients));
+      await AsyncStorage.setItem('clientesGuardados', JSON.stringify(updatedList));
+      await AsyncStorage.setItem('clientesEliminados', JSON.stringify(updatedDeletedClients));
 
       setClientsList(updatedList);
       setDeletedClients(updatedDeletedClients);

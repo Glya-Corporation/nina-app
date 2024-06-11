@@ -8,7 +8,7 @@ export default function DeletedClients() {
   useEffect(() => {
     const fetchDeletedClients = async () => {
       try {
-        const data = await AsyncStorage.getItem('deletedClients');
+        const data = await AsyncStorage.getItem('clientesEliminados');
         if (data !== null) {
           setDeletedClients(JSON.parse(data));
         }
@@ -32,7 +32,6 @@ export default function DeletedClients() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Clientes Eliminados</Text>
       <FlatList data={deletedClients} renderItem={renderClient} keyExtractor={(item, index) => item.id.toString()} showsVerticalScrollIndicator={false} />
       <StatusBar style='auto' />
     </View>

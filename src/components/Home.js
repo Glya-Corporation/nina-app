@@ -4,6 +4,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formatDate from '../functions/formatDate.js';
+import { all } from 'axios';
 
 const CustomButton = ({ title, onPress }) => (
   <TouchableOpacity style={styles.input} onPress={onPress}>
@@ -31,7 +32,7 @@ const Home = () => {
   useEffect(() => {
     const checkPercentage = async () => {
       try {
-        const percentage = await AsyncStorage.getItem('percentage');
+        const percentage = await AsyncStorage.getItem('porcentaje');
         if (percentage === null) {
           setModalVisible(true); // Show modal if percentage is not set
         }
@@ -40,14 +41,25 @@ const Home = () => {
       }
     };
 
+    const getAll = async () => {
+      try {
+        const allData = await AsyncStorage.getAllKeys();
+        console.log(allData);
+      } catch (error) {
+        console.error('Error al traer toda la data', error);
+      }
+    };
+
     checkPercentage();
+
+    getAll();
   }, []);
 
   const savePercentage = async () => {
     const value = parseInt(percentage, 10);
     if (!isNaN(value) && value >= 1 && value <= 100) {
       try {
-        await AsyncStorage.setItem('percentage', value.toString());
+        await AsyncStorage.setItem('porcentaje', value.toString());
         setModalVisible(false);
         Alert.alert('Success', 'Percentage saved successfully!');
       } catch (error) {
@@ -78,7 +90,7 @@ const Home = () => {
     };
 
     try {
-      const existingData = await AsyncStorage.getItem('allClients');
+      const existingData = await AsyncStorage.getItem('clientesGuardados');
       const dataArray = existingData ? JSON.parse(existingData) : [];
 
       const userExists = dataArray.some(client => client.name === name && client.date === formattedDate);
@@ -87,7 +99,7 @@ const Home = () => {
         Alert.alert('Error', 'El usuario ya existe.');
       } else {
         dataArray.push(newData);
-        await AsyncStorage.setItem('allClients', JSON.stringify(dataArray));
+        await AsyncStorage.setItem('clientesGuardados', JSON.stringify(dataArray));
         Alert.alert('Éxito', 'Usuario guardado con éxito!');
 
         // Clear input fields

@@ -31,7 +31,7 @@ const Reservations = ({ route }) => {
 
   const fetchReservations = useCallback(async () => {
     try {
-      const clientsData = await AsyncStorage.getItem('allClients');
+      const clientsData = await AsyncStorage.getItem('clientesGuardados');
       const clients = clientsData ? JSON.parse(clientsData) : [];
       const today = formatDate(new Date());
       setReservations(filterDate(clients, today));
