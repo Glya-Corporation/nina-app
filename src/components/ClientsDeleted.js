@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function DeletedClients() {
+export default DeletedClients = () => {
   const [deletedClients, setDeletedClients] = useState([]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function DeletedClients() {
       <StatusBar style='auto' />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

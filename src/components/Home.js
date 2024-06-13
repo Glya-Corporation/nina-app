@@ -4,7 +4,6 @@ import SelectDropdown from 'react-native-select-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import formatDate from '../functions/formatDate.js';
-import { all } from 'axios';
 
 const CustomButton = ({ title, onPress }) => (
   <TouchableOpacity style={styles.input} onPress={onPress}>
@@ -41,18 +40,7 @@ const Home = () => {
       }
     };
 
-    const getAll = async () => {
-      try {
-        const allData = await AsyncStorage.getAllKeys();
-        console.log(allData);
-      } catch (error) {
-        console.error('Error al traer toda la data', error);
-      }
-    };
-
     checkPercentage();
-
-    getAll();
   }, []);
 
   const savePercentage = async () => {
@@ -83,10 +71,11 @@ const Home = () => {
     const newData = {
       id: generateUniqueId(), // Generate unique ID
       name,
-      price,
+      price: price !== '' ? price : '1',
       description,
       service,
-      date: formattedDate
+      date: formattedDate,
+      status: false
     };
 
     try {

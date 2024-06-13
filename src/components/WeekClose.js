@@ -28,8 +28,6 @@ const WeekClose = ({ route }) => {
       const storedWeeklyClose = JSON.parse(await AsyncStorage.getItem('registro')) || [];
       const storedPercentage = await AsyncStorage.getItem('porcentaje');
 
-      console.log(storedWeeklyClose);
-
       setWeeklyClose(storedWeeklyClose);
       setFilteredData(storedWeeklyClose);
       if (storedPercentage) setPercentage(parseFloat(storedPercentage));
@@ -135,8 +133,8 @@ const WeekClose = ({ route }) => {
         <Text style={styles.itemText}>Inicio: {item.inicio}</Text>
         <Text style={styles.itemText}>Final: {item.cierre}</Text>
         <Text style={styles.itemText}>Clientes: {item.clientes.length}</Text>
-        <Text style={styles.itemText}>Total Cobrado: ${item.totalCobrado.toFixed(2)}</Text>
-        <Text style={styles.itemText}>Total Ganado: ${item.totalGanado.toFixed(2)}</Text>
+        <Text style={styles.itemText}>Total Cobrado: ${parseFloat(item.cobrado).toFixed(2)}</Text>
+        <Text style={styles.itemText}>Total Ganado: ${parseFloat(item.ganado).toFixed(2)}</Text>
       </View>
       <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.deleteIcon}>
         <MaterialIcons name='delete' size={24} color='black' />
@@ -158,9 +156,9 @@ const WeekClose = ({ route }) => {
               <Text style={styles.modalTitle}>Detalles del Cierre</Text>
               <Text style={styles.modalText}>Inicio: {selectedClose.inicio}</Text>
               <Text style={styles.modalText}>Final: {selectedClose.cierre}</Text>
-              <Text style={styles.modalText}>Total Cobrado: ${selectedClose.totalCobrado.toFixed(2)}</Text>
-              <Text style={styles.modalText}>Total Ganado: ${selectedClose.totalGanado.toFixed(2)}</Text>
-              <Text style={styles.modalText}>Clientes:</Text>
+              <Text style={styles.modalText}>Total Cobrado: ${parseFloat(selectedClose.cobrado).toFixed(2)}</Text>
+              <Text style={styles.modalText}>Total Ganado: ${parseFloat(selectedClose.ganado).toFixed(2)}</Text>
+              <Text style={styles.modalText}>Clientes: {selectedClose.clientes.length}</Text>
               <ScrollView style={styles.clientList}>
                 {selectedClose.clientes.map((client, index) => (
                   <View key={index} style={styles.clientItem}>

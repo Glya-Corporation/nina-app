@@ -39,7 +39,7 @@ const TotalReport = ({ route }) => {
           }
         }
       });
-
+      console.log(parsedPercentage);
       const totalEarned = (totalCharged * parsedPercentage) / 100;
       setServiceCounts(serviceCounts);
       setTotalEarned(totalEarned);

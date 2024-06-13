@@ -10,6 +10,7 @@ import Reservations from '../components/Reservations.js';
 import WeekClose from '../components/WeekClose.js';
 import ClientsDeleted from '../components/ClientsDeleted.js';
 import Setting from '../components/Setting.js';
+import TopTabGroup from './TopTabGroup.js';
 
 const Drawer = createDrawerNavigator();
 
@@ -46,7 +47,7 @@ const DrawerGroup = () => {
       />
       <Drawer.Screen
         name='Clientes'
-        component={Clients}
+        component={TopTabGroup}
         options={screenOptionsWithRefresh(() => {})} // Agrega tu lógica de refresco aquí
       />
       <Drawer.Screen

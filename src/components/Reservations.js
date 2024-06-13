@@ -33,6 +33,7 @@ const Reservations = ({ route }) => {
     try {
       const clientsData = await AsyncStorage.getItem('clientesGuardados');
       const clients = clientsData ? JSON.parse(clientsData) : [];
+      console.log(clients);
       const today = formatDate(new Date());
       setReservations(filterDate(clients, today));
     } catch (error) {

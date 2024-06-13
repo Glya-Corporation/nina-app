@@ -35,8 +35,11 @@ const ImportData = () => {
   };
 
   const saveData = async data => {
+    await AsyncStorage.clear();
+
     for (const key in data) {
-      await AsyncStorage.setItem(key, data.key);
+      if (key !== 'porcentaje') await AsyncStorage.setItem(key, JSON.stringify(data[key]));
+      if (key === 'porcentaje') await AsyncStorage.setItem(key, data[key]);
     }
 
     Alert.alert('Data complete');
